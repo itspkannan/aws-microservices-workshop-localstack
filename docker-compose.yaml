@@ -1,0 +1,23 @@
+services:
+  mock-aws-services:
+    hostname: mock-aws-services
+    container_name: mock-aws-services
+    image: localstack/localstack:latest
+    ports:
+      - "127.0.0.1:4566:4566"  
+      - "127.0.0.1:4571:4571"  
+    environment:
+      - SERVICES=s3,sqs,sns,ssm
+      - DEBUG=1
+      - DATA_DIR=/tmp/localstack/data
+      - DEFAULT_REGION=us-east-1
+      - HOSTNAME_EXTERNAL=localstack
+  
+    networks:
+      - appnet
+
+networks:
+  appnet:
+    name: appnet
+    driver: bridge
+    external: true
