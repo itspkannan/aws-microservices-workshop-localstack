@@ -12,7 +12,6 @@ Each microservice in this repo focuses on one or more AWS services and follows b
 | Coming Soon | Event-driven processing | SQS, SNS |
 | Coming Soon | Secrets and configuration | SSM Parameter Store, Secrets Manager |
 | Coming Soon | Auth and user isolation | IAM |
-| Coming Soon | File virus scanning | Lambda, S3 triggers |
 | Coming Soon | Audit trail and monitoring | CloudWatch, X-Ray |
 
 ---
