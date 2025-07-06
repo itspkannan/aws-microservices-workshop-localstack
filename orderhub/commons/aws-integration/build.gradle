@@ -1,0 +1,41 @@
+apply plugin: 'java-library'
+
+dependencies {
+  implementation 'org.springframework:spring-context:6.2.3'
+  implementation 'org.springframework:spring-beans:6.2.3'
+  implementation 'org.springframework:spring-core:6.2.3'
+  implementation 'org.yaml:snakeyaml:2.3'
+  implementation platform("software.amazon.awssdk:bom:2.28.22")
+  implementation "software.amazon.awssdk:sqs"
+  implementation "software.amazon.awssdk:sns"
+  implementation "software.amazon.awssdk:regions"
+  implementation 'com.fasterxml.jackson.core:jackson-databind:2.18.2'
+  implementation 'org.slf4j:slf4j-api:2.0.13'
+}
+
+sourceSets {
+  integrationTest {
+    java.srcDir file('src/integrationTest/java')
+    resources.srcDir file('src/integrationTest/resources')
+    compileClasspath += sourceSets.main.output + configurations.testRuntimeClasspath
+    runtimeClasspath += output + compileClasspath
+  }
+}
+
+
+task integrationTest(type: Test) {
+  description = 'Runs integration tests using LocalStack/Testcontainers'
+  group = 'verification'
+
+  testClassesDirs = sourceSets.integrationTest.output.classesDirs
+  classpath = sourceSets.integrationTest.runtimeClasspath
+  shouldRunAfter test
+  useJUnitPlatform()
+}
+
+configurations {
+  integrationTestImplementation.extendsFrom testImplementation
+  integrationTestRuntimeOnly.extendsFrom testRuntimeOnly
+}
+
+

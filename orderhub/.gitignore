@@ -8,3 +8,7 @@ out/
 *.jar
 .env
 .DS_Store
+
+**/terraform.tfstate
+**/terraform.tfstate.backup
+**/.terraform

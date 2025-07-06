@@ -1,5 +1,5 @@
 rootProject.name = 'orderhub'
-include 'commons:shared-lib'
+include 'commons:aws-integration'
 include 'services:order-service-api'
 include 'services:order-processor-service'
 include 'services:notification-service'
