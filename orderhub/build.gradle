@@ -1,0 +1,28 @@
+buildscript {
+  ext {
+    springBootVersion = '3.2.5'
+  }
+  repositories {
+    mavenCentral()
+  }
+  dependencies {
+    classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
+  }
+}
+
+allprojects {
+  group = 'io.github.itspkannan'
+  version = '0.1.0'
+
+  repositories {
+    mavenCentral()
+  }
+}
+
+subprojects {
+  apply plugin: 'java'
+
+  test {
+    useJUnitPlatform()
+  }
+}
