@@ -1,15 +1,35 @@
-.DEFAULT_GOAL := help
 
+ROOT_DIR := $(realpath $(dir $(lastword $(MAKEFILE_LIST)))/../..)
+GRADLE_CMD = $(ROOT_DIR)/gradlew
+SERVICE = order-processor-service
+SERVICE_USER = order-processor-user
+
+.PHONY: help
 help: ## 📖 Show available commands
-	@echo "\n🔧 Available commands for order-processor-service:"
-	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS=":.*?## "}; {printf "  \033[36m%-20s\033[0m %s\n", $order-processor-service, $}'
+	@echo "\033[1;33mAvailable commands for $(SERVICE):\033[0m" && \
+	awk -F ':.*?## ' '/^[a-zA-Z0-9_.-]+:.*## / { \
+		cmds[$$1] = $$2; \
+		if (length($$1) > max_len) max_len = length($$1); \
+	} \
+	END { \
+		for (cmd in cmds) { \
+			printf "  \033[36m%-" max_len "s\033[0m %s\n", cmd, cmds[cmd]; \
+		} \
+	}' $(MAKEFILE_LIST) | sort
+	@echo ""
 
+.PHONY: build
 build: ## 🛠️ Build the service
-	../../gradlew :services:order-processor-service:build
+	$(GRADLE_CMD) :services:$(SERVICE):build
 
+.PHONY: run
 run: ## 🚀 Run the Spring Boot app
-	../../gradlew :services:order-processor-service:bootRun
+	$(GRADLE_CMD) :services:$(SERVICE):bootRun
 
-docker-build: ## 🐳 Build Docker image
-	../../gradlew :services:order-processor-service:bootJar
-	docker build -t order-processor-service:latest -f Dockerfile .
+.PHONY: docker.build
+docker.build: ## 🐳 Build Docker image
+	@echo "[INFO] Building $(SERVICE)and docker image"
+	$(GRADLE_CMD) :services:$(SERVICE):bootJar
+	@docker build --build-arg APP_USER=$(SERVICE_USER) \
+			--build-arg SERVICE_NAME=$(SERVICE) \
+			-t $(SERVICE):latest -f Dockerfile .
