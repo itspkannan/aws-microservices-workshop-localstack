@@ -8,7 +8,7 @@ Each microservice in this repo focuses on one or more AWS services and follows b
 
 | Service | Purpose | AWS Services Used |
 |--------|---------|-------------------|
-| [./orderhub](./orderhub) | Event-driven processing - Place Order - Fanout to persist and notification service | SQS, SNS |
+| [./orderhub](orderhub) | Event-driven processing - Place Order - Fanout to persist and notification service | SQS, SNS |
 | TODO | Cloud storage microservice | S3 |
 | TODO | Secrets and configuration | SSM Parameter Store, Secrets Manager |
 | TODO | Auth and user isolation | IAM |
