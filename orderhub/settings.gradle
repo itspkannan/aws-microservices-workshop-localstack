@@ -1,3 +1,9 @@
+pluginManagement {
+  plugins {
+    id 'com.diffplug.spotless' version '6.25.0'
+  }
+}
+
 rootProject.name = 'orderhub'
 include 'commons:event-model'
 include 'commons:aws-integration'
@@ -5,3 +11,4 @@ include 'commons:services-common'
 include 'services:order-service-api'
 include 'services:order-processor-service'
 include 'services:notification-service'
+

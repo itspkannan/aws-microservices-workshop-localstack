@@ -18,10 +18,8 @@ public class SnsPublisher {
   public void publish(Object event) {
     try {
       String json = mapper.writeValueAsString(event);
-      snsClient.publish(PublishRequest.builder()
-        .topicArn(props.getSns().getTopicArn())
-        .message(json)
-        .build());
+      snsClient.publish(
+          PublishRequest.builder().topicArn(props.getSns().getTopicArn()).message(json).build());
     } catch (Exception e) {
       throw new RuntimeException("Failed to publish event", e);
     }

@@ -1,5 +1,8 @@
 package io.github.itspkannan.aws;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
 import io.github.itspkannan.aws.config.AwsProperties;
 import io.github.itspkannan.aws.sns.SnsPublisher;
 import org.junit.jupiter.api.Test;
@@ -7,9 +10,6 @@ import org.mockito.ArgumentCaptor;
 import software.amazon.awssdk.services.sns.SnsClient;
 import software.amazon.awssdk.services.sns.model.PublishRequest;
 import software.amazon.awssdk.services.sns.model.PublishResponse;
-
-import static org.mockito.Mockito.*;
-import static org.junit.jupiter.api.Assertions.*;
 
 class SnsPublisherTest {
 
@@ -22,7 +22,7 @@ class SnsPublisherTest {
     props.getSns().setTopicArn("arn:aws:sns:us-east-1:123456789012:my-topic");
 
     when(mockClient.publish(any(PublishRequest.class)))
-      .thenReturn(PublishResponse.builder().messageId("123").build());
+        .thenReturn(PublishResponse.builder().messageId("123").build());
 
     SnsPublisher publisher = new SnsPublisher(mockClient, props);
 

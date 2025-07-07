@@ -14,18 +14,21 @@ public class AwsProperties {
   private Sns sns;
   private Sqs sqs;
 
-  @Getter @Setter
+  @Getter
+  @Setter
   public static class Credentials {
     private String accessKey;
     private String secretKey;
   }
 
-  @Getter @Setter
+  @Getter
+  @Setter
   public static class Sns {
     private String topicArn;
   }
 
-  @Getter @Setter
+  @Getter
+  @Setter
   public static class Sqs {
     private String queueUrl;
   }

@@ -3,9 +3,8 @@ package io.github.itspkannan.order.eventhandler;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.itspkannan.order.event.OrderCreatedEvent;
-import lombok.extern.slf4j.Slf4j;
-
 import java.util.function.Consumer;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class OrderCreatedEventHandler {

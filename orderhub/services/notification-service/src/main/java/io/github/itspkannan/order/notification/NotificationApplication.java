@@ -9,10 +9,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 
 @Slf4j
-@SpringBootApplication(scanBasePackages = {
-  "io.github.itspkannan.order",
-  "io.github.itspkannan.aws"
-})
+@SpringBootApplication(
+    scanBasePackages = {"io.github.itspkannan.order", "io.github.itspkannan.aws"})
 public class NotificationApplication {
 
   public static void main(String[] args) {

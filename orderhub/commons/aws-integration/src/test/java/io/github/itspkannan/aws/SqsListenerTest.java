@@ -1,17 +1,16 @@
 package io.github.itspkannan.aws;
 
+import static org.mockito.Mockito.*;
+
 import io.github.itspkannan.aws.config.AwsProperties;
 import io.github.itspkannan.aws.sqs.SqsListener;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import software.amazon.awssdk.services.sqs.SqsClient;
 import software.amazon.awssdk.services.sqs.model.*;
-
-import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Consumer;
-
-import static org.mockito.Mockito.*;
 
 class SqsListenerTest {
 
@@ -33,25 +32,22 @@ class SqsListenerTest {
   @Test
   void shouldReceiveAndHandleSqsMessage() throws InterruptedException {
     // Arrange
-    Message message = Message.builder()
-      .body("Mock SQS message")
-      .receiptHandle("abc-123")
-      .build();
+    Message message = Message.builder().body("Mock SQS message").receiptHandle("abc-123").build();
 
-    ReceiveMessageResponse mockResponse = ReceiveMessageResponse.builder()
-      .messages(List.of(message))
-      .build();
+    ReceiveMessageResponse mockResponse =
+        ReceiveMessageResponse.builder().messages(List.of(message)).build();
 
     when(mockSqsClient.receiveMessage(any(ReceiveMessageRequest.class)))
-      .thenReturn(mockResponse)
-      .thenReturn(ReceiveMessageResponse.builder().messages(List.of()).build()); // stop after one
+        .thenReturn(mockResponse)
+        .thenReturn(ReceiveMessageResponse.builder().messages(List.of()).build()); // stop after one
 
     AtomicBoolean messageHandled = new AtomicBoolean(false);
 
-    Consumer<Message> handler = msg -> {
-      messageHandled.set(true);
-      assert msg.body().equals("Mock SQS message");
-    };
+    Consumer<Message> handler =
+        msg -> {
+          messageHandled.set(true);
+          assert msg.body().equals("Mock SQS message");
+        };
 
     // Act
     Thread listenerThread = new Thread(() -> sqsListener.start(handler));
