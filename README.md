@@ -16,7 +16,7 @@ Each microservice in this repo focuses on one or more AWS services and follows b
 
 ---
 
-## 🚀 Project 1: `s3-drive` (S3 File Storage Microservice)
+## 🚀 Project 1: OrderHub - A service to demonstrate event driven processing 
 
 Simple stock order system with limited feature 
 
