@@ -153,7 +153,7 @@ Available commands:
 
 - Start the localstack , postgress docker containers.
 
-`make init.infra start.infra`        
+`make init.infra start.infra`
 
 - Create the queues and topics
 
@@ -349,12 +349,26 @@ sns_topic_arn = "arn:aws:sns:us-east-1:000000000000:stock-order-events-topic"
 }
 ```
 
+### 🔄  Flow:
+
+1. `order-api` receives the REST request.
+2. Publishes message to SNS (`order-topic`).
+3. SNS fan-outs to SQS (`notification-queue` , `orderprocessor-queue`).
+4. `notification-service` picks up and logs/handles the order to send notification.
+5. `order-processor-service` picks up and persists the order to database (currently only logs).
+
 ### 4️⃣ start, Stop Services Locally
 
+The following command will start all services
+
 ```bash
-make orderapi.start        # REST API to place orders
-make orderprocessor.start        # REST API to place orders
-make notification.start     # Worker that listens to SQS
+❯ make services.start
+📣 Starting Notification service...
+✅ Notification running (log: /tmp/notification.log, pid: 90399)
+⚙️  Starting Order Processor service...
+✅ Order Processor running (log: /tmp/orderprocessor.log, pid: 90407)
+🚀 Starting Order API service...
+✅ Order API running (log: /tmp/orderapi.log, pid: 90425)
 ```
 
 ## 🧪 Test the Order Flow
@@ -373,7 +387,7 @@ curl -X POST http://localhost:8080/api/orders \
   }'
 ```
 
-- check for messages in the `order-processor-queue`
+- check for messages in the `order-processor-queue`, if the backend services are not running.
 
 ```bash
 ❯ make sqs.list orderprocessor.sqs.peek
@@ -403,14 +417,10 @@ curl -X POST http://localhost:8080/api/orders \
 }
 ```
 
+- Login to email service `http://localhost:8025` and verify email sent
 
-### 🔄 Expected Flow:
+![img.png](email.png)
 
-1. `order-api` receives the REST request.
-2. Publishes message to SNS (`order-topic`).
-3. SNS fan-outs to SQS (`notification-queue` , `orderprocessor-queue`).
-4. `notification-service` picks up and logs/handles the order to send notification.
-5. `order-processor-service` picks up and persists the order to database (currently only logs).
 
 ## 🧪 Run All Tests
 

@@ -9,5 +9,6 @@ dependencies {
   implementation project(':commons:aws-integration')
   implementation project(':commons:services-common')
   implementation 'org.springframework.boot:spring-boot-starter'
+  implementation 'org.springframework.boot:spring-boot-starter-mail'
   testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
