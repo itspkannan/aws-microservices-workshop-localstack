@@ -126,6 +126,11 @@ init: init.infra terraform.init ## Initialize development environment prerequisi
 build: ## 🏗️ Build all modules
 	./gradlew build
 
+.PHONY: format
+format: ## 🏗️ Format all java code as per google styl;e
+	./gradlew spotlessApply
+
+
 .PHONY: test.unit
 test.unit: ## 🧪 Run unit tests
 	./gradlew test
