@@ -1,0 +1,8 @@
+aws:
+  region: us-east-1
+  credentials:
+    access-key: test
+    secret-key: test
+  endpoint: http://127.0.0.1:4566
+  sns:
+    topic-arn: arn:aws:sns:us-east-1:000000000000:stock-order-events-topic

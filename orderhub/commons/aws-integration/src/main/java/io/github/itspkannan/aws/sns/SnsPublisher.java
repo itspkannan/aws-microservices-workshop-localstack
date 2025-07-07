@@ -15,7 +15,7 @@ public class SnsPublisher {
 
   public void publish(String message) {
     PublishRequest req = PublishRequest.builder()
-      .topicArn(props.getSnsTopicArn())
+      .topicArn(props.getSns().getTopicArn())
       .message(message)
       .build();
     var response = snsClient.publish(req);

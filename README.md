@@ -8,15 +8,25 @@ Each microservice in this repo focuses on one or more AWS services and follows b
 
 | Service | Purpose | AWS Services Used |
 |--------|---------|-------------------|
-| [s3-drive](./s3-drive) | Cloud storage microservice (Dropbox/OneDrive clone) | S3 |
-| Coming Soon | Event-driven processing | SQS, SNS |
-| Coming Soon | Secrets and configuration | SSM Parameter Store, Secrets Manager |
-| Coming Soon | Auth and user isolation | IAM |
-| Coming Soon | Audit trail and monitoring | CloudWatch, X-Ray |
+| [./orderhub](./orderhub) | Event-driven processing - Place Order - Fanout to persist and notification service | SQS, SNS |
+| TODO | Cloud storage microservice | S3 |
+| TODO | Secrets and configuration | SSM Parameter Store, Secrets Manager |
+| TODO | Auth and user isolation | IAM |
+| TODO | Audit trail and monitoring | CloudWatch, X-Ray |
 
 ---
 
 ## 🚀 Project 1: `s3-drive` (S3 File Storage Microservice)
+
+Simple stock order system with limited feature 
+
+### ✅ Features
+
+- Place order using RestAPI
+- Send the order request to SNS
+- Fan out to two queues - Order Processor to persist and Notification Service
+
+## 🚀 Project 2: `s3-drive` (S3 File Storage Microservice) (TODO)
 
 This microservice mimics the basic functionality of **Dropbox or OneDrive** using AWS S3 as the storage backend.
 

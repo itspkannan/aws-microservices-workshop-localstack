@@ -107,7 +107,7 @@ sqs.list:  ## 📬 List SQS queues
 
 sns.list:  ## 📣 List SNS topics
 	@echo "📣 Listing SNS Topics..."
-	@$(AWS_CLI_DOCKER_RUN) sns list-topics--region us-east-1 \
+	@$(AWS_CLI_DOCKER_RUN) sns list-topics --region us-east-1 \
 		--endpoint-url $(LOCALSTACK_URL)
 
 ssm.list:  ## 📦 List SSM parameters
@@ -121,14 +121,64 @@ init: init.infra terraform.init ## Initialize development environment prerequisi
 	@echo "[INFO] Initializing Gradle wrapper."
 	@gradle wrapper
 
+.PHONY: build
 build: ## 🏗️ Build all modules
 	./gradlew build
 
-test.unit: ## 🧪 Run all tests
+.PHONY: test.unit
+test.unit: ## 🧪 Run unit tests
 	./gradlew test
 
-test.integration:
+.PHONY: test.integration
+test.integration: ## 🧪 Run integration tests
 	./gradlew integrationTest
 
+.PHONY: clean
 clean: ## 🧹 Clean all builds
 	./gradlew clean
+
+
+##--------------------------------------------------------------
+##  --- Run Services, Stop Services, Look at logs  ---
+##--------------------------------------------------------------
+
+orderapi.start: ## 🚀 Start the Order API service
+	@echo "🚀 Starting Order API service..."
+	@nohup ./gradlew :services:order-service-api:bootRun > /tmp/orderapi.log 2>&1 & echo $$! > /tmp/orderapi.pid && \
+	echo "✅ Order API running (log: /tmp/orderapi.log, pid: `cat /tmp/orderapi.pid`)"
+
+orderapi.stop: ## ❌ Stop the Order API service
+	@kill `cat /tmp/orderapi.pid` 2>/dev/null || echo "Order API not running"
+	@rm -f /tmp/orderapi.pid
+
+orderapi.logs: ## 📄 Tail logs for Order API
+	@echo "📄 Tailing /tmp/orderapi.log ..."
+	@tail -f /tmp/orderapi.log
+
+orderprocessor.start: ## ⚙️ Start the Order Processor service
+	@echo "⚙️  Starting Order Processor service..."
+	@nohup ./gradlew :services:order-processor-service:bootRun > /tmp/orderprocessor.log 2>&1 & echo $$! > /tmp/orderprocessor.pid && \
+	echo "✅ Order Processor running (log: /tmp/orderprocessor.log, pid: `cat /tmp/orderprocessor.pid`)"
+
+orderprocessor.stop: ## ❌ Stop the Order Processor service
+	@kill `cat /tmp/orderprocessor.pid` 2>/dev/null || echo "Order Processor not running"
+	@rm -f /tmp/orderprocessor.pid
+
+orderprocessor.logs: ## 📄 Tail logs for Order Processor
+	@echo "📄 Tailing /tmp/orderprocessor.log ..."
+	@tail -f /tmp/orderprocessor.log
+
+notification.start: ## 📣 Start the Notification service
+	@echo "📣 Starting Notification service..."
+	@nohup ./gradlew :services:notification-service:bootRun > /tmp/notification.log 2>&1 & echo $$! > /tmp/notification.pid && \
+	echo "✅ Notification running (log: /tmp/notification.log, pid: `cat /tmp/notification.pid`)"
+
+notification.stop: ## ❌ Stop the Notification service
+	@kill `cat /tmp/notification.pid` 2>/dev/null || echo "Notification not running"
+	@rm -f /tmp/notification.pid
+
+notification.logs: ## 📄 Tail logs for Notification Service
+	@echo "📄 Tailing /tmp/notification.log ..."
+	@tail -f /tmp/notification.log
+
+##--------------------------------------------------------------

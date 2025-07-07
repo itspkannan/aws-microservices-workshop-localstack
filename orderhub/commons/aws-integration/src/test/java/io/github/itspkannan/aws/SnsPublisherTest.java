@@ -18,7 +18,8 @@ class SnsPublisherTest {
     // Arrange
     SnsClient mockClient = mock(SnsClient.class);
     AwsProperties props = new AwsProperties();
-    props.setSnsTopicArn("arn:aws:sns:us-east-1:123456789012:my-topic");
+    props.setSns(new AwsProperties.Sns());
+    props.getSns().setTopicArn("arn:aws:sns:us-east-1:123456789012:my-topic");
 
     when(mockClient.publish(any(PublishRequest.class)))
       .thenReturn(PublishResponse.builder().messageId("123").build());

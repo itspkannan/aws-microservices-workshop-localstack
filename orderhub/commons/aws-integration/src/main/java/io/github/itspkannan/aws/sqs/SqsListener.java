@@ -23,7 +23,7 @@ public class SqsListener {
     executor.submit(() -> {
       while (true) {
         ReceiveMessageRequest request = ReceiveMessageRequest.builder()
-          .queueUrl(props.getSqsQueueUrl())
+          .queueUrl(props.getSqs().getQueueUrl())
           .maxNumberOfMessages(5)
           .waitTimeSeconds(10)
           .build();
@@ -34,7 +34,7 @@ public class SqsListener {
             log.info("Received: {}", msg.body());
             handler.accept(msg);
             sqsClient.deleteMessage(DeleteMessageRequest.builder()
-              .queueUrl(props.getSqsQueueUrl())
+              .queueUrl(props.getSqs().getQueueUrl())
               .receiptHandle(msg.receiptHandle())
               .build());
           } catch (Exception e) {

@@ -5,7 +5,7 @@ A modular, event-driven **Spring Boot** microservices architecture that simulate
 
 <details> <summary>📊 Flow Diagram</summary>
 
-```mermaid 
+```mermaid
 flowchart TD
     A[Client App] --> B[API Gateway / Load Balancer]
     B --> C[Order Service API - Publisher]
@@ -14,7 +14,7 @@ flowchart TD
     %% Fan-out from SQS to multiple consumers
     E --> F[Order Processor Service]
     E --> G[Notification Service]
-    
+
     F --> H[Database - Orders ]
     G --> I[Email/SMS Gateway]
 
@@ -104,46 +104,61 @@ orderhub/
 | Containers | Docker + Docker Compose    |
 
 
-## 🚧 Setup Instructions
+## 🚧 Development and Setup Instructions
 
-The following are various commands 
+<details><summary>Various Commands</summary>
 
 ```bash
 ❯ make help
 
 Available commands:
-  build             🏗️ Build all modules
-  clean             🧹 Clean all builds
-  clean.infra       🧹 Clean resources created for various services
-  help              📖 Help message
-  init              Initialize development environment prerequisites
-  init.infra        🌐 Create the infrastructure
-  logs.infra        📜  Localstack logs
-  ps.infra          📦 Container Status
-  s3.list           📂 List S3 buckets
-  sns.list          📣 List SNS topics
-  sqs.list          📬 List SQS queues
-  ssm.list          📦 List SSM parameters
-  start.infra       🚀 Start localstack services.
-  stop.infra        🛑 Stop LocalStack services.
-  terraform.apply   ✅ Terraform Apply
-  terraform.destroy 🔥 Terraform Destroy
-  terraform.fmt     🧹 Terraform Format
-  terraform.init    🚀 Terraform Init
-  terraform.plan    🔍 Terraform Plan
-  terraform.show    📜 Terraform Show"
-  test.unit         🧪 Run all tests
+  build               🏗️ Build all modules
+  clean               🧹 Clean all builds
+  clean.infra         🧹 Clean resources created for various services
+  help                📖 Help message
+  init                Initialize development environment prerequisites
+  init.infra          🌐 Create the infrastructure
+  logs.infra          📜  Localstack logs
+  notification.logs   📄 Tail logs for Notification Service
+  notification.run    📣 Start the Notification service
+  notification.stop   ❌ Stop the Notification service
+  orderapi.logs       📄 Tail logs for Order API
+  orderapi.start        🚀 Start the Order API service
+  orderapi.stop       ❌ Stop the Order API service
+  orderprocessor.logs 📄 Tail logs for Order Processor
+  orderprocessor.start  ⚙️ Start the Order Processor service
+  orderprocessor.stop ❌ Stop the Order Processor service
+  ps.infra            📦 Container Status
+  s3.list             📂 List S3 buckets
+  sns.list            📣 List SNS topics
+  sqs.list            📬 List SQS queues
+  ssm.list            📦 List SSM parameters
+  start.infra         🚀 Start localstack services.
+  stop.infra          🛑 Stop LocalStack services.
+  terraform.apply     ✅ Terraform Apply
+  terraform.destroy   🔥 Terraform Destroy
+  terraform.fmt       🧹 Terraform Format
+  terraform.init      🚀 Terraform Init
+  terraform.plan      🔍 Terraform Plan
+  terraform.show      📜 Terraform Show"
+  test.integration    🧪 Run integration tests
+  test.unit           🧪 Run unit tests
 ```
 
+</details>
 
 ### 3️⃣ Start LocalStack Infrastructure
 
-```bash
-make infra.up        # or docker-compose up -d
-make init.sqs        # initializes SNS topics and SQS queues
-```
+- Start the localstack , postgress docker containers.
 
-<details><summary> Terraform Apply to create SQS/SNS </summary>
+`make init.infra start.infra`        
+
+- Create the queues and topics
+
+`make terraform.init terraform.apply`
+
+
+<details><summary> Terraform apply output that creates SQS/SNS </summary>
 
 ```bash
 ✅ Terraform Apply
@@ -310,13 +325,35 @@ sns_topic_arn = "arn:aws:sns:us-east-1:000000000000:stock-order-events-topic"
 ```
 </details>
 
-### 4️⃣ Run Services Locally
+*Testing the created SNS/SQS*
 
 ```bash
-make run.order-api         # REST API to place orders
-make run.notification      # Worker that listens to SQS
+❯ make sns.list
+📣 Listing SNS Topics...
+{
+    "Topics": [
+        {
+            "TopicArn": "arn:aws:sns:us-east-1:000000000000:stock-order-events-topic"
+        }
+    ]
+}
+❯ make sqs.list
+📬 Listing SQS Queues...
+{
+    "QueueUrls": [
+        "http://sqs.us-east-1.localhost.localstack.cloud:4566/000000000000/order-processor-queue",
+        "http://sqs.us-east-1.localhost.localstack.cloud:4566/000000000000/notification-queue"
+    ]
+}
 ```
 
+### 4️⃣ start, Stop Services Locally
+
+```bash
+make orderapi.start        # REST API to place orders
+make orderprocessor.start        # REST API to place orders
+make notification.start     # Worker that listens to SQS
+```
 
 ## 🧪 Test the Order Flow
 
@@ -337,21 +374,19 @@ curl -X POST http://localhost:8080/api/orders \
 
 1. `order-api` receives the REST request.
 2. Publishes message to SNS (`order-topic`).
-3. SNS fan-outs to SQS (`notification-queue`).
-4. `notification-service` picks up and logs/handles the order.
-
-
+3. SNS fan-outs to SQS (`notification-queue` , `orderprocessor-queue`).
+4. `notification-service` picks up and logs/handles the order to send notification.
+5. `order-processor-service` picks up and persists the order to database (currently only logs).
 
 ## 🧪 Run All Tests
 
 ```bash
-./gradlew test
+make test
 ```
 
-## 📌 TODOs
+## 📌 Improvements
 
 * 🗃️ Add database persistence (e.g., PostgreSQL or DynamoDB)
 * 🔐 Add JWT authentication & authorization
 * 📈 Add metrics via Micrometer + Prometheus
 * 🔁 Add retry and DLQ handling for SQS consumers
-* 🔍 Add OpenAPI/Swagger for API documentation

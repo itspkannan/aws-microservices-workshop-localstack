@@ -23,7 +23,9 @@ class SqsListenerTest {
   void setUp() {
     mockSqsClient = mock(SqsClient.class);
     props = new AwsProperties();
-    props.setSqsQueueUrl("https://sqs.us-east-1.amazonaws.com/123456789012/test-queue");
+    props.setSqs(new AwsProperties.Sqs());
+
+    props.getSqs().setQueueUrl("https://sqs.us-east-1.amazonaws.com/123456789012/test-queue");
 
     sqsListener = new SqsListener(mockSqsClient, props);
   }

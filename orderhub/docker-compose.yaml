@@ -1,3 +1,5 @@
+version: "3.8"
+
 services:
   mock-aws-services:
     hostname: mock-aws-services
@@ -12,9 +14,40 @@ services:
       - DATA_DIR=/tmp/localstack/data
       - DEFAULT_REGION=us-east-1
       - HOSTNAME_EXTERNAL=localstack
-
     networks:
       - orderhub
+
+  postgres:
+    container_name: postgres
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: orderhub
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - orderhub
+
+  pgadmin:
+    container_name: pgadmin
+    image: dpage/pgadmin4:latest
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@orderhub.local
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+    networks:
+      - orderhub
+
+volumes:
+  pgdata:
 
 networks:
   orderhub:
