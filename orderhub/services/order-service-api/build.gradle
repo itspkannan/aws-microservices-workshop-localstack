@@ -5,8 +5,10 @@ plugins {
 }
 
 dependencies {
+  implementation project(':commons:event-model')
+  implementation project(':commons:aws-integration')
+  implementation project(':commons:services-common')
   implementation 'org.springframework.boot:spring-boot-starter'
   implementation 'org.springframework.boot:spring-boot-starter-web'
-  implementation project(':commons:aws-integration')
   testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }

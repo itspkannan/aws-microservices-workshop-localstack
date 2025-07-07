@@ -1,4 +1,5 @@
-@docker compose=docker compose
+include Makefile.services
+
 SERVICE_NAME=localstack
 TF_DIR := ./terraform
 DOCKER_NETWORK ?= orderhub
@@ -137,69 +138,3 @@ test.integration: ## 🧪 Run integration tests
 clean: ## 🧹 Clean all builds
 	./gradlew clean
 
-##--------------------------------------------------------------
-##  --- Run Services, Stop Services, Look at logs  ---
-##--------------------------------------------------------------
-
-orderapi.start: ## 🚀 Start the Order API service
-	@echo "🚀 Starting Order API service..."
-	@nohup ./gradlew :services:order-service-api:bootRun > /tmp/orderapi.log 2>&1 & echo $$! > /tmp/orderapi.pid && \
-	echo "✅ Order API running (log: /tmp/orderapi.log, pid: `cat /tmp/orderapi.pid`)"
-
-orderapi.stop: ## ❌ Stop the Order API service
-	@kill `cat /tmp/orderapi.pid` 2>/dev/null || echo "Order API not running"
-	@rm -f /tmp/orderapi.pid
-
-orderapi.logs: ## 📄 Tail logs for Order API
-	@echo "📄 Tailing /tmp/orderapi.log ..."
-	@tail -f /tmp/orderapi.log
-
-orderprocessor.start: ## ⚙️ Start the Order Processor service
-	@echo "⚙️  Starting Order Processor service..."
-	@nohup ./gradlew :services:order-processor-service:bootRun > /tmp/orderprocessor.log 2>&1 & echo $$! > /tmp/orderprocessor.pid && \
-	echo "✅ Order Processor running (log: /tmp/orderprocessor.log, pid: `cat /tmp/orderprocessor.pid`)"
-
-
-orderprocessor.stop: ## ❌ Stop the Order Processor service
-	@kill `cat /tmp/orderprocessor.pid` 2>/dev/null || echo "Order Processor not running"
-	@rm -f /tmp/orderprocessor.pid
-
-orderprocessor.logs: ## 📄 Tail logs for Order Processor
-	@echo "📄 Tailing /tmp/orderprocessor.log ..."
-	@tail -f /tmp/orderprocessor.log
-
-orderprocessor.sqs.peek: ## 🔍 Peek into messages from 'order-processor-queue'
-	@echo "🔍 Reading messages from order-processor-queue..."
-	@$(AWS_CLI_DOCKER_RUN) sqs receive-message \
-		--queue-url "http://sqs.us-east-1.localhost.localstack.cloud:4566/000000000000/order-processor-queue" \
-		--endpoint-url $(LOCALSTACK_URL) \
-		--region us-east-1 \
-		--max-number-of-messages 10 \
-		--visibility-timeout 0 \
-		--wait-time-seconds 1 \
-		|| echo "❌ No messages found."
-
-notification.start: ## 📣 Start the Notification service
-	@echo "📣 Starting Notification service..."
-	@nohup ./gradlew :services:notification-service:bootRun > /tmp/notification.log 2>&1 & echo $$! > /tmp/notification.pid && \
-	echo "✅ Notification running (log: /tmp/notification.log, pid: `cat /tmp/notification.pid`)"
-
-notification.stop: ## ❌ Stop the Notification service
-	@kill `cat /tmp/notification.pid` 2>/dev/null || echo "Notification not running"
-	@rm -f /tmp/notification.pid
-
-notification.logs: ## 📄 Tail logs for Notification Service
-	@echo "📄 Tailing /tmp/notification.log ..."
-	@tail -f /tmp/notification.log
-
-notification.sqs.peek: ## 🔍 Peek into messages from 'notification-queue'
-	@echo "🔍 Reading messages from notification-queue..."
-	@$(AWS_CLI_DOCKER_RUN) sqs receive-message \
-		--queue-url $(LOCALSTACK_URL)/000000000000/notification-queue \
-		--region us-east-1 \
-		--max-number-of-messages 10 \
-		--visibility-timeout 0 \
-		--wait-time-seconds 1 \
-		|| echo "❌ No messages found."
-
-##--------------------------------------------------------------

@@ -1,10 +1,10 @@
 package io.github.itspkannan.order.api.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.github.itspkannan.aws.event.AwsEvent;
 import io.github.itspkannan.aws.sns.SnsPublisher;
 import io.github.itspkannan.order.dto.CreateOrderRequest;
-import io.github.itspkannan.order.model.OrderEvent;
+import io.github.itspkannan.order.event.OrderCreatedEvent;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +19,6 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class OrderController {
   private static final Logger log = LoggerFactory.getLogger(OrderController.class);
-  private final ObjectMapper objectMapper = new ObjectMapper();
   private final SnsPublisher snsPublisher;
 
   @PostMapping
@@ -28,33 +27,25 @@ public class OrderController {
       // skipping validation, authentication check
       log.info("📦 Received order: {}", request);
 
-      OrderEvent event = new OrderEvent(
+      OrderCreatedEvent event = new OrderCreatedEvent(
         request.getUserId(),
         request.getSymbol(),
         request.getQuantity(),
         request.getType()
       );
 
-      String json = objectMapper.writeValueAsString(event);
-      snsPublisher.publish(json);
+      AwsEvent<OrderCreatedEvent> wrapper = new AwsEvent<>("OrderCreated", event);
+      snsPublisher.publish(wrapper);
 
       return ResponseEntity.ok("Order received for user " + request.getUserId());
-    } catch (JsonProcessingException e) {
-      log.error("Error serializing order event: {}", e.getMessage(), e);
-      return ResponseEntity
-        .status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .body(Map.of(
-          "error", "Failed to process order",
-          "details", e.getMessage()
-        ));
-    } catch (Exception e) {
-      log.error("Unexpected error while processing order: {}", e.getMessage(), e);
-      return ResponseEntity
-        .status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .body(Map.of(
-          "error", "Unexpected server error",
-          "details", e.getMessage()
-        ));
+      } catch (Exception e) {
+          log.error("Unexpected error while processing order: {}", e.getMessage(), e);
+          return ResponseEntity
+          .status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body(Map.of(
+            "error", "Unexpected server error",
+            "details", e.getMessage()
+          ));
     }
   }
 

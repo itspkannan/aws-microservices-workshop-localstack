@@ -34,7 +34,7 @@ class SnsPublisherTest {
     verify(mockClient).publish(captor.capture());
 
     PublishRequest request = captor.getValue();
-    assertEquals("test message", request.message());
+    assertEquals("\"test message\"", request.message());
     assertEquals("arn:aws:sns:us-east-1:123456789012:my-topic", request.topicArn());
   }
 }
