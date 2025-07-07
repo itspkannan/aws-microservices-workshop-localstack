@@ -112,37 +112,39 @@ orderhub/
 ❯ make help
 
 Available commands:
-  build               🏗️ Build all modules
-  clean               🧹 Clean all builds
-  clean.infra         🧹 Clean resources created for various services
-  help                📖 Help message
-  init                Initialize development environment prerequisites
-  init.infra          🌐 Create the infrastructure
-  logs.infra          📜  Localstack logs
-  notification.logs   📄 Tail logs for Notification Service
-  notification.run    📣 Start the Notification service
-  notification.stop   ❌ Stop the Notification service
-  orderapi.logs       📄 Tail logs for Order API
-  orderapi.start        🚀 Start the Order API service
-  orderapi.stop       ❌ Stop the Order API service
-  orderprocessor.logs 📄 Tail logs for Order Processor
-  orderprocessor.start  ⚙️ Start the Order Processor service
-  orderprocessor.stop ❌ Stop the Order Processor service
-  ps.infra            📦 Container Status
-  s3.list             📂 List S3 buckets
-  sns.list            📣 List SNS topics
-  sqs.list            📬 List SQS queues
-  ssm.list            📦 List SSM parameters
-  start.infra         🚀 Start localstack services.
-  stop.infra          🛑 Stop LocalStack services.
-  terraform.apply     ✅ Terraform Apply
-  terraform.destroy   🔥 Terraform Destroy
-  terraform.fmt       🧹 Terraform Format
-  terraform.init      🚀 Terraform Init
-  terraform.plan      🔍 Terraform Plan
-  terraform.show      📜 Terraform Show"
-  test.integration    🧪 Run integration tests
-  test.unit           🧪 Run unit tests
+  build                   🏗️ Build all modules
+  clean                   🧹 Clean all builds
+  clean.infra             🧹 Clean resources created for various services
+  help                    📖 Help message
+  init                    Initialize development environment prerequisites
+  init.infra              🌐 Create the infrastructure
+  logs.infra              📜  Localstack logs
+  notification.logs       📄 Tail logs for Notification Service
+  notification.sqs.peek   🔍 Peek into messages from 'notification-queue'
+  notification.start      📣 Start the Notification service
+  notification.stop       ❌ Stop the Notification service
+  orderapi.logs           📄 Tail logs for Order API
+  orderapi.start          🚀 Start the Order API service
+  orderapi.stop           ❌ Stop the Order API service
+  orderprocessor.logs     📄 Tail logs for Order Processor
+  orderprocessor.sqs.peek 🔍 Peek into messages from 'order-processor-queue'
+  orderprocessor.start    ⚙️ Start the Order Processor service
+  orderprocessor.stop     ❌ Stop the Order Processor service
+  ps.infra                📦 Container Status
+  s3.list                 📂 List S3 buckets
+  sns.list                📣 List SNS topics
+  sqs.list                📬 List SQS queues
+  ssm.list                📦 List SSM parameters
+  start.infra             🚀 Start localstack services.
+  stop.infra              🛑 Stop LocalStack services.
+  terraform.apply         ✅ Terraform Apply
+  terraform.destroy       🔥 Terraform Destroy
+  terraform.fmt           🧹 Terraform Format
+  terraform.init          🚀 Terraform Init
+  terraform.plan          🔍 Terraform Plan
+  terraform.show          📜 Terraform Show"
+  test.integration        🧪 Run integration tests
+  test.unit               🧪 Run unit tests
 ```
 
 </details>
@@ -359,6 +361,7 @@ make notification.start     # Worker that listens to SQS
 
 ### ➕ Place an Order (REST API)
 
+- Place the order to `order-service-api`
 ```bash
 curl -X POST http://localhost:8080/api/orders \
   -H 'Content-Type: application/json' \
@@ -369,6 +372,37 @@ curl -X POST http://localhost:8080/api/orders \
     "type": "BUY"
   }'
 ```
+
+- check for messages in the `order-processor-queue`
+
+```bash
+❯ make sqs.list orderprocessor.sqs.peek
+📬 Listing SQS Queues...
+{
+    "QueueUrls": [
+        "http://sqs.us-east-1.localhost.localstack.cloud:4566/000000000000/order-processor-queue",
+        "http://sqs.us-east-1.localhost.localstack.cloud:4566/000000000000/notification-queue"
+    ]
+}
+🔍 Reading messages from order-processor-queue...
+{
+    "Messages": [
+        {
+            "MessageId": "8250d9a9-4410-48b2-9a52-5b6114b60edf",
+            "ReceiptHandle": "NmE2MWYzZjUtNmMxZC00ZTkxLTkzNDItZmQyODU0NjlhMjQ0IGFybjphd3M6c3FzOnVzLWVhc3QtMTowMDAwMDAwMDAwMDA6b3JkZXItcHJvY2Vzc29yLXF1ZXVlIDgyNTBkOWE5LTQ0MTAtNDhiMi05YTUyLTViNjExNGI2MGVkZiAxNzUxODQ4OTA3LjM5OTU3Nzk=",
+            "MD5OfBody": "b9f33c187937f5e8b6cabdae6bab5027",
+            "Body": "{\"userId\":\"user-123\",\"symbol\":\"AAPL\",\"quantity\":100,\"type\":\"BUY\"}"
+        },
+        {
+            "MessageId": "ccc9a4e0-c398-42ce-9d17-b572ffe68b98",
+            "ReceiptHandle": "NDExYjdhNGYtODRiMy00YjBjLTlkNDctYWE2NmVlOTg5YWNjIGFybjphd3M6c3FzOnVzLWVhc3QtMTowMDAwMDAwMDAwMDA6b3JkZXItcHJvY2Vzc29yLXF1ZXVlIGNjYzlhNGUwLWMzOTgtNDJjZS05ZDE3LWI1NzJmZmU2OGI5OCAxNzUxODQ4OTA3LjM5OTYzMQ==",
+            "MD5OfBody": "b9f33c187937f5e8b6cabdae6bab5027",
+            "Body": "{\"userId\":\"user-123\",\"symbol\":\"AAPL\",\"quantity\":100,\"type\":\"BUY\"}"
+        }
+    ]
+}
+```
+
 
 ### 🔄 Expected Flow:
 

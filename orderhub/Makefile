@@ -7,8 +7,8 @@ TF_DOCKER_RUN := docker run --rm \
 	-e AWS_ACCESS_KEY_ID=test -e AWS_SECRET_ACCESS_KEY=test \
 	-e AWS_DEFAULT_REGION=us-east-1 hashicorp/terraform:1.8
 
-AWS_CLI_DOCKER_RUN = docker run --rm --network $(DOCKER_NETWORK) \
-  -e AWS_ACCESS_KEY_ID=test -e AWS_SECRET_ACCESS_KEY=test amazon/aws-cli
+AWS_CLI_DOCKER_RUN = docker run --rm --network $(DOCKER_NETWORK) -e AWS_DEFAULT_REGION=us-east-1  \
+	-e AWS_SESSION_TOKEN=test -e AWS_ACCESS_KEY_ID=test -e AWS_SECRET_ACCESS_KEY=test amazon/aws-cli
 
 LOCALSTACK_URL := http://mock-aws-services:4566
 
@@ -137,7 +137,6 @@ test.integration: ## 🧪 Run integration tests
 clean: ## 🧹 Clean all builds
 	./gradlew clean
 
-
 ##--------------------------------------------------------------
 ##  --- Run Services, Stop Services, Look at logs  ---
 ##--------------------------------------------------------------
@@ -160,6 +159,7 @@ orderprocessor.start: ## ⚙️ Start the Order Processor service
 	@nohup ./gradlew :services:order-processor-service:bootRun > /tmp/orderprocessor.log 2>&1 & echo $$! > /tmp/orderprocessor.pid && \
 	echo "✅ Order Processor running (log: /tmp/orderprocessor.log, pid: `cat /tmp/orderprocessor.pid`)"
 
+
 orderprocessor.stop: ## ❌ Stop the Order Processor service
 	@kill `cat /tmp/orderprocessor.pid` 2>/dev/null || echo "Order Processor not running"
 	@rm -f /tmp/orderprocessor.pid
@@ -167,6 +167,17 @@ orderprocessor.stop: ## ❌ Stop the Order Processor service
 orderprocessor.logs: ## 📄 Tail logs for Order Processor
 	@echo "📄 Tailing /tmp/orderprocessor.log ..."
 	@tail -f /tmp/orderprocessor.log
+
+orderprocessor.sqs.peek: ## 🔍 Peek into messages from 'order-processor-queue'
+	@echo "🔍 Reading messages from order-processor-queue..."
+	@$(AWS_CLI_DOCKER_RUN) sqs receive-message \
+		--queue-url "http://sqs.us-east-1.localhost.localstack.cloud:4566/000000000000/order-processor-queue" \
+		--endpoint-url $(LOCALSTACK_URL) \
+		--region us-east-1 \
+		--max-number-of-messages 10 \
+		--visibility-timeout 0 \
+		--wait-time-seconds 1 \
+		|| echo "❌ No messages found."
 
 notification.start: ## 📣 Start the Notification service
 	@echo "📣 Starting Notification service..."
@@ -180,5 +191,15 @@ notification.stop: ## ❌ Stop the Notification service
 notification.logs: ## 📄 Tail logs for Notification Service
 	@echo "📄 Tailing /tmp/notification.log ..."
 	@tail -f /tmp/notification.log
+
+notification.sqs.peek: ## 🔍 Peek into messages from 'notification-queue'
+	@echo "🔍 Reading messages from notification-queue..."
+	@$(AWS_CLI_DOCKER_RUN) sqs receive-message \
+		--queue-url $(LOCALSTACK_URL)/000000000000/notification-queue \
+		--region us-east-1 \
+		--max-number-of-messages 10 \
+		--visibility-timeout 0 \
+		--wait-time-seconds 1 \
+		|| echo "❌ No messages found."
 
 ##--------------------------------------------------------------
